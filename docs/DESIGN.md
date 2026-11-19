@@ -33,8 +33,8 @@ walks you through diagnosing issues when something goes wrong — including offl
 
 | Concern | Choice (**proposed** unless marked ✅ confirmed) | Why |
 | --- | --- | --- |
-| Frontend | ✅ TypeScript web app, installable on phone · proposed: Next.js (App Router) + Tailwind, installable **PWA** | Test on desktop, install on phone; offline via service worker |
-| Backend | ✅ Python · proposed: Python 3.12 + **FastAPI** + Pydantic | Clean typed API; Python ecosystem for extraction, rules and later forecasting |
+| Frontend | ✅ Next.js 16 (App Router) + TypeScript, installable **PWA** · styling not yet decided | Test on desktop, install on phone; offline via service worker |
+| Backend | ✅ Python · ✅ FastAPI · Python 3.13 + Pydantic | Clean typed API; Python ecosystem for extraction, rules and later forecasting |
 | API contract | FastAPI's OpenAPI schema → generated TypeScript client (`openapi-typescript`) | Frontend and backend types can't drift |
 | Database | PostgreSQL + SQLAlchemy 2.0 + Alembic migrations | Relational history, versioned schema |
 | Auth | Email login, session/JWT issued by the backend | Multi-user from day one |
@@ -44,7 +44,7 @@ walks you through diagnosing issues when something goes wrong — including offl
 | Jobs | Daily scheduled job (APScheduler or system cron) for mileage estimate, alerts, recall check | Small scale; no Celery/Redis needed |
 | Notifications | Web Push from the backend (`pywebpush`); iOS 16.4+ requires app added to Home Screen | |
 | External data | NHTSA vPIC (VIN decode), NHTSA Recalls API | Free, official |
-| Local dev | Docker Compose for Postgres; `uv` for Python, `pnpm` for the frontend | |
+| Local dev | ✅ `uv` for Python, ✅ `pnpm` for the frontend; proposed: Docker Compose for Postgres | |
 | Later: OBD-II | Native app (Expo) + ELM327-compatible **BLE** adapter, reusing the same backend API | iOS Safari has no Web Bluetooth |
 
 Proposed layout, one repo with two apps:
@@ -231,6 +231,23 @@ unless it is live.**
 | 4 | Offline emergency guides, PWA install, push notifications |
 | 5 | Trends/forecasting, pre-trip check, repair-estimate explainer, cost tracking |
 | 6 | Native app + BLE OBD-II |
+
+**Workflow:** one git branch per phase (`phase-1`, `phase-2`, …). Each phase is split into small
+steps; each step ends in a working, testable state that the owner reviews and commits before the
+next step starts. Steps for a phase are written here when that phase begins.
+
+### Phase 1 steps (branch `phase-1`)
+
+| # | Step | Done when | Decisions needed first | Status |
+| --- | --- | --- | --- | --- |
+| 1.1 | Project scaffolding: `frontend/` (Next.js) + `backend/` (FastAPI), health check, CORS, run docs | Backend test passes; frontend builds and shows "Backend connected" | Frameworks, tooling ✅ | ✅ Done |
+| 1.2 | Database foundation: local database, ORM, migrations, `users` + `vehicles` tables | `alembic upgrade head` creates tables; a test writes and reads a vehicle | Database, ORM | Next |
+| 1.3 | Auth: email sign-up/login, every API scoped to the logged-in user | Two users can't see each other's data (tested) | Auth approach | |
+| 1.4 | Add vehicle: VIN entry → NHTSA vPIC decode → user confirms make/model/trim/engine → saved | Your Accord's VIN produces a vehicle record you've confirmed | — | |
+| 1.5 | Document upload & storage: PDF/photo upload, stored on disk, listed per vehicle | Upload a dealer document and see it in a list; file kept in `uploads/` | Styling (first real UI) | |
+| 1.6 | AI extraction: Claude reads the document → structured JSON (date, mileage, Minder code, items, measurements, confidence) | Running it on a real dealer document gives correct fields | Claude model; sample documents | |
+| 1.7 | Review & commit: side-by-side document vs. extracted fields, edit, confirm → saved as `service_events`, `service_items`, `measurements`, `mileage_readings` | A confirmed document appears as structured records | — | |
+| 1.8 | Timeline: chronological list of service events with links to source documents | Your uploaded history shows newest-first on phone and desktop | — | |
 
 ### Phase 6 hardware note
 

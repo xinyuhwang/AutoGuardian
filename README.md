@@ -46,17 +46,34 @@ what to check and what to do when it happens anyway.
 
 ## Planned stack
 
-TypeScript frontend and Python backend are decided; the specific libraries below are proposals.
+Decided: Next.js frontend, FastAPI backend, pnpm and uv. Other rows are proposals.
 
 | Layer | Tech |
 | --- | --- |
-| Frontend | Next.js + TypeScript + Tailwind, installable PWA (`frontend/`) |
+| Frontend | Next.js + TypeScript, installable PWA (`frontend/`); styling TBD |
 | Backend | Python FastAPI + Pydantic (`backend/`) |
 | Database | PostgreSQL + SQLAlchemy + Alembic |
 | AI | Claude API: document extraction and diagnostic chat |
 | Data | NHTSA vPIC (VIN decode) and Recalls APIs |
 | Notifications | Web Push |
 | Later | Expo native app for Bluetooth OBD-II, using the same backend |
+
+## Development
+
+Requirements: Node 20.9+ with pnpm, and Python 3.13 with [uv](https://docs.astral.sh/uv/).
+
+```bash
+# Backend: http://localhost:8000 (API docs at /docs)
+cd backend && uv sync && uv run fastapi dev app/main.py
+
+# Frontend: http://localhost:3000
+cd frontend && pnpm install && pnpm dev
+```
+
+If you run the frontend on a port other than 3000, start the backend with
+`CORS_ORIGINS=http://localhost:<port>` so the browser is allowed to call it.
+
+Tests: `cd backend && uv run pytest` · Lint: `cd frontend && pnpm lint`
 
 ## Roadmap
 
