@@ -19,6 +19,8 @@ app/
   config.py     settings from environment variables
   db.py         engine, session, Base, TimestampMixin, get_db dependency
   models/       one file per table; import all via app.models
+  auth/         passwords (argon2), sessions, /auth routes, CurrentUser dependency
+  routers/      feature endpoints (vehicles, ...); always filter by CurrentUser
 alembic/        migrations (versions/ holds one file per schema change)
 tests/          pytest; conftest.py builds the test DB from migrations
 ```
@@ -37,3 +39,13 @@ tests/          pytest; conftest.py builds the test DB from migrations
 | `DATABASE_URL` | `postgresql+psycopg://autoguardian:autoguardian@localhost:5433/autoguardian` | Dev database |
 | `TEST_DATABASE_URL` | same server, database `autoguardian_test` | Test database (wiped by each test run) |
 | `CORS_ORIGINS` | `http://localhost:3000` | Comma-separated frontend origins allowed to call the API |
+| `SESSION_COOKIE_SECURE` | `false` | Set `true` in production so the session cookie is HTTPS-only |
+| `SESSION_LIFETIME_DAYS` | `30` | How long a login lasts |
+
+## Auth
+
+Email + password. `POST /auth/register` / `POST /auth/login` set an HTTP-only `ag_session`
+cookie; `POST /auth/logout` deletes it; `GET /auth/me` returns the current user. Only a SHA-256
+hash of the session token is stored. Protected endpoints take `user: CurrentUser` and must filter
+every query by `user.id`; another user's records return 404. The frontend must call the API with
+`credentials: "include"`.

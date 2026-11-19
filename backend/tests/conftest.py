@@ -5,9 +5,13 @@ from pathlib import Path
 import pytest
 from alembic import command
 from alembic.config import Config
+from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
+
+from app.db import get_db
+from app.main import app
 
 # Tests use a separate database (created by docker/postgres-init) so dev data is never touched.
 TEST_DATABASE_URL = os.getenv(
@@ -36,9 +40,33 @@ def db(engine: Engine) -> Iterator[Session]:
     """A session whose changes are rolled back after each test."""
     with engine.connect() as connection:
         transaction = connection.begin()
-        session = Session(bind=connection, join_transaction_mode="create_savepoint")
+        session = Session(
+            bind=connection,
+            join_transaction_mode="create_savepoint",
+            expire_on_commit=False,
+        )
         try:
             yield session
         finally:
             session.close()
             transaction.rollback()
+
+
+def _client_for(db: Session) -> TestClient:
+    app.dependency_overrides[get_db] = lambda: db
+    return TestClient(app)
+
+
+@pytest.fixture
+def client(db: Session) -> Iterator[TestClient]:
+    """API client using the rolled-back test session. Has its own cookie jar."""
+    with _client_for(db) as test_client:
+        yield test_client
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def other_client(db: Session, client: TestClient) -> Iterator[TestClient]:
+    """A second browser (separate cookies), for testing that users can't see each other's data."""
+    with _client_for(db) as test_client:
+        yield test_client

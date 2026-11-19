@@ -1,6 +1,7 @@
 """All ORM models. Import from here so every table is registered on Base.metadata."""
 
+from app.models.session import UserSession
 from app.models.user import User
 from app.models.vehicle import Vehicle
 
-__all__ = ["User", "Vehicle"]
+__all__ = ["User", "UserSession", "Vehicle"]

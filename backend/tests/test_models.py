@@ -9,7 +9,7 @@ ACCORD_VIN = "1HGCV1F3XJA000000"  # 17 characters; not a real vehicle
 
 
 def make_user(db: Session, email: str = "owner@example.com") -> User:
-    user = User(email=email)
+    user = User(email=email, password_hash="not-a-real-hash")
     db.add(user)
     db.flush()
     return user

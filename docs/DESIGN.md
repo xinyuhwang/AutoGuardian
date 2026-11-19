@@ -37,7 +37,7 @@ walks you through diagnosing issues when something goes wrong — including offl
 | Backend | ✅ Python · ✅ FastAPI · Python 3.13 + Pydantic | Clean typed API; Python ecosystem for extraction, rules and later forecasting |
 | API contract | FastAPI's OpenAPI schema → generated TypeScript client (`openapi-typescript`) | Frontend and backend types can't drift |
 | Database | ✅ PostgreSQL 17 (Docker, host port 5433) + ✅ SQLAlchemy 2.x **sync** + Alembic migrations | Relational history, versioned schema; sync keeps code simple (async only for Claude streaming endpoints) |
-| Auth | Email login, session/JWT issued by the backend | Multi-user from day one |
+| Auth | ✅ Built in FastAPI: ✅ email + password (Argon2), HTTP-only session cookie, sessions stored hashed in Postgres | Multi-user from day one; no third party |
 | File storage | Local disk in dev → S3-compatible in prod | Original documents kept forever |
 | Document extraction | Claude API via Anthropic Python SDK (reads PDFs/photos directly) → Pydantic schema | No separate OCR service |
 | Chat / diagnosis | Claude API with tool calling over the app's own data, streamed to the frontend | History-aware answers |
@@ -242,8 +242,8 @@ next step starts. Steps for a phase are written here when that phase begins.
 | --- | --- | --- | --- | --- |
 | 1.1 | Project scaffolding: `frontend/` (Next.js) + `backend/` (FastAPI), health check, CORS, run docs | Backend test passes; frontend builds and shows "Backend connected" | Frameworks, tooling ✅ | ✅ Done |
 | 1.2 | Database foundation: local database, ORM, migrations, `users` + `vehicles` tables | `alembic upgrade head` creates tables; a test writes and reads a vehicle | Database, ORM ✅ | ✅ Done |
-| 1.3 | Auth: email sign-up/login, every API scoped to the logged-in user | Two users can't see each other's data (tested) | Auth approach | Next |
-| 1.4 | Add vehicle: VIN entry → NHTSA vPIC decode → user confirms make/model/trim/engine → saved | Your Accord's VIN produces a vehicle record you've confirmed | — | |
+| 1.3 | Auth: email sign-up/login, every API scoped to the logged-in user | Two users can't see each other's data (tested) | Auth approach ✅ | ✅ Done (API; login screens come with the first UI in 1.5) |
+| 1.4 | Add vehicle: VIN entry → NHTSA vPIC decode → user confirms make/model/trim/engine → saved | Your Accord's VIN produces a vehicle record you've confirmed | — | Next |
 | 1.5 | Document upload & storage: PDF/photo upload, stored on disk, listed per vehicle | Upload a dealer document and see it in a list; file kept in `uploads/` | Styling (first real UI) | |
 | 1.6 | AI extraction: Claude reads the document → structured JSON (date, mileage, Minder code, items, measurements, confidence) | Running it on a real dealer document gives correct fields | Claude model; sample documents | |
 | 1.7 | Review & commit: side-by-side document vs. extracted fields, edit, confirm → saved as `service_events`, `service_items`, `measurements`, `mileage_readings` | A confirmed document appears as structured records | — | |
