@@ -46,13 +46,13 @@ what to check and what to do when it happens anyway.
 
 ## Planned stack
 
-Decided: Next.js frontend, FastAPI backend, pnpm and uv. Other rows are proposals.
+Decided: Next.js frontend, FastAPI backend, pnpm and uv, Postgres + SQLAlchemy. Other rows are proposals.
 
 | Layer | Tech |
 | --- | --- |
 | Frontend | Next.js + TypeScript, installable PWA (`frontend/`); styling TBD |
 | Backend | Python FastAPI + Pydantic (`backend/`) |
-| Database | PostgreSQL + SQLAlchemy + Alembic |
+| Database | PostgreSQL 17 (Docker) + SQLAlchemy 2.x (sync) + Alembic |
 | AI | Claude API: document extraction and diagnostic chat |
 | Data | NHTSA vPIC (VIN decode) and Recalls APIs |
 | Notifications | Web Push |
@@ -60,11 +60,14 @@ Decided: Next.js frontend, FastAPI backend, pnpm and uv. Other rows are proposal
 
 ## Development
 
-Requirements: Node 20.9+ with pnpm, and Python 3.13 with [uv](https://docs.astral.sh/uv/).
+Requirements: Node 20.9+ with pnpm, Python 3.13 with [uv](https://docs.astral.sh/uv/), and Docker.
 
 ```bash
+# Database: Postgres 17 on localhost:5433
+docker compose up -d --wait
+
 # Backend: http://localhost:8000 (API docs at /docs)
-cd backend && uv sync && uv run fastapi dev app/main.py
+cd backend && uv sync && uv run alembic upgrade head && uv run fastapi dev app/main.py
 
 # Frontend: http://localhost:3000
 cd frontend && pnpm install && pnpm dev
