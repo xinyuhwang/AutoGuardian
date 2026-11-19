@@ -33,7 +33,7 @@ walks you through diagnosing issues when something goes wrong — including offl
 
 | Concern | Choice (**proposed** unless marked ✅ confirmed) | Why |
 | --- | --- | --- |
-| Frontend | ✅ Next.js 16 (App Router) + TypeScript, installable **PWA** · styling not yet decided | Test on desktop, install on phone; offline via service worker |
+| Frontend | ✅ Next.js 16 (App Router) + TypeScript + ✅ **Tailwind** (theme tokens in `globals.css`, shared UI components), installable **PWA** | Test on desktop, install on phone; offline via service worker |
 | Backend | ✅ Python · ✅ FastAPI · Python 3.13 + Pydantic | Clean typed API; Python ecosystem for extraction, rules and later forecasting |
 | API contract | FastAPI's OpenAPI schema → generated TypeScript client (`openapi-typescript`) | Frontend and backend types can't drift |
 | Database | ✅ PostgreSQL 17 (Docker, host port 5433) + ✅ SQLAlchemy 2.x **sync** + Alembic migrations | Relational history, versioned schema; sync keeps code simple (async only for Claude streaming endpoints) |
@@ -243,8 +243,9 @@ next step starts. Steps for a phase are written here when that phase begins.
 | 1.1 | Project scaffolding: `frontend/` (Next.js) + `backend/` (FastAPI), health check, CORS, run docs | Backend test passes; frontend builds and shows "Backend connected" | Frameworks, tooling ✅ | ✅ Done |
 | 1.2 | Database foundation: local database, ORM, migrations, `users` + `vehicles` tables | `alembic upgrade head` creates tables; a test writes and reads a vehicle | Database, ORM ✅ | ✅ Done |
 | 1.3 | Auth: email sign-up/login, every API scoped to the logged-in user | Two users can't see each other's data (tested) | Auth approach ✅ | ✅ Done (API; login screens come with the first UI in 1.5) |
+| 1.4a | Login & sign-up screens: Tailwind setup with design tokens, shared `Button`/`Input`/`Card` components, sign-up/login/logout, signed-in home | You can sign up, log in and out in the browser on phone and desktop widths | Styling ✅ | ✅ Done |
 | 1.4 | Add vehicle: VIN entry → NHTSA vPIC decode → user confirms make/model/trim/engine → saved | Your Accord's VIN produces a vehicle record you've confirmed | — | Next |
-| 1.5 | Document upload & storage: PDF/photo upload, stored on disk, listed per vehicle | Upload a dealer document and see it in a list; file kept in `uploads/` | Styling (first real UI) | |
+| 1.5 | Document upload & storage: PDF/photo upload, stored on disk, listed per vehicle | Upload a dealer document and see it in a list; file kept in `uploads/` | — | |
 | 1.6 | AI extraction: Claude reads the document → structured JSON (date, mileage, Minder code, items, measurements, confidence) | Running it on a real dealer document gives correct fields | Claude model; sample documents | |
 | 1.7 | Review & commit: side-by-side document vs. extracted fields, edit, confirm → saved as `service_events`, `service_items`, `measurements`, `mileage_readings` | A confirmed document appears as structured records | — | |
 | 1.8 | Timeline: chronological list of service events with links to source documents | Your uploaded history shows newest-first on phone and desktop | — | |

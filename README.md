@@ -46,11 +46,11 @@ what to check and what to do when it happens anyway.
 
 ## Planned stack
 
-Decided: Next.js frontend, FastAPI backend, pnpm and uv, Postgres + SQLAlchemy. Other rows are proposals.
+Decided: Next.js + Tailwind frontend, FastAPI backend, pnpm and uv, Postgres + SQLAlchemy. Other rows are proposals.
 
 | Layer | Tech |
 | --- | --- |
-| Frontend | Next.js + TypeScript, installable PWA (`frontend/`); styling TBD |
+| Frontend | Next.js + TypeScript + Tailwind, installable PWA (`frontend/`) |
 | Backend | Python FastAPI + Pydantic (`backend/`) |
 | Database | PostgreSQL 17 (Docker) + SQLAlchemy 2.x (sync) + Alembic |
 | AI | Claude API: document extraction and diagnostic chat |
@@ -60,7 +60,7 @@ Decided: Next.js frontend, FastAPI backend, pnpm and uv, Postgres + SQLAlchemy. 
 
 ## Development
 
-Requirements: Node 20.9+ with pnpm, Python 3.13 with [uv](https://docs.astral.sh/uv/), and Docker.
+Requirements: Node 20.19+ or 22.12+ with pnpm, Python 3.13 with [uv](https://docs.astral.sh/uv/), and Docker.
 
 ```bash
 # Database: Postgres 17 on localhost:5433
