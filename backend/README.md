@@ -47,5 +47,12 @@ tests/          pytest; conftest.py builds the test DB from migrations
 Email + password. `POST /auth/register` / `POST /auth/login` set an HTTP-only `ag_session`
 cookie; `POST /auth/logout` deletes it; `GET /auth/me` returns the current user. Only a SHA-256
 hash of the session token is stored. Protected endpoints take `user: CurrentUser` and must filter
-every query by `user.id`; another user's records return 404. The frontend must call the API with
+every query by `user.id`; another user's records return 404.
+
+## VIN decoding
+
+`GET /vehicles/decode-vin?vin=...` validates the VIN (17 chars, no I/O/Q, check digit), asks NHTSA
+vPIC (free, no key) and returns *proposed* details plus warnings. It never saves; the frontend
+saves with `POST /vehicles` after the user confirms. Logic is in `app/vin.py`; tests mock NHTSA via
+the `get_http_client` dependency, so they never touch the network. The frontend must call the API with
 `credentials: "include"`.

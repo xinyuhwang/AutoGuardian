@@ -1,21 +1,70 @@
 """Vehicle endpoints. Every query is filtered by the logged-in user, so one user can never
-read or change another user's vehicles. (VIN decoding arrives in step 1.4.)"""
+read or change another user's vehicles."""
 
+from collections.abc import Iterator
+from dataclasses import asdict
 from datetime import date
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, status
+import httpx
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
+from app import vin as vin_service
 from app.auth.deps import CurrentUser, DbSession
 from app.models import Vehicle
 
 router = APIRouter(prefix="/vehicles", tags=["vehicles"])
 
 
+def get_http_client() -> Iterator[httpx.Client]:
+    """Outbound HTTP client (overridden in tests so they never hit the network)."""
+    with httpx.Client(headers={"User-Agent": "AutoGuardian"}) as client:
+        yield client
+
+
+HttpClient = Annotated[httpx.Client, Depends(get_http_client)]
+
+
+class VinDecodeOut(BaseModel):
+    """Proposed vehicle details from NHTSA. Nothing is saved until the user confirms."""
+
+    vin: str
+    year: int | None
+    make: str | None
+    model: str | None
+    trim: str | None
+    engine: str | None
+    transmission: str | None
+    body_class: str | None
+    drive_type: str | None
+    fuel_type: str | None
+    warnings: list[str]
+    source: str = "NHTSA vPIC"
+
+
+@router.get("/decode-vin")
+def decode_vin(
+    vin: Annotated[str, Query(max_length=40)], user: CurrentUser, client: HttpClient
+) -> VinDecodeOut:
+    try:
+        normalized = vin_service.normalize_vin(vin)
+    except vin_service.InvalidVin as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc))
+    try:
+        decoded = vin_service.decode_vin(normalized, client)
+    except vin_service.VinLookupUnavailable:
+        raise HTTPException(
+            status.HTTP_502_BAD_GATEWAY,
+            "The NHTSA VIN lookup is unavailable right now. You can enter the details manually.",
+        )
+    return VinDecodeOut(**asdict(decoded))
+
+
 class VehicleIn(BaseModel):
-    vin: str | None = Field(default=None, min_length=17, max_length=17)
+    vin: str | None = Field(default=None, max_length=40)  # normalized to 17 chars on save
     year: int = Field(ge=1981, le=2100)  # 17-character VINs began in 1981
     make: str = Field(min_length=1, max_length=50)
     model: str = Field(min_length=1, max_length=50)
@@ -55,8 +104,12 @@ def list_vehicles(db: DbSession, user: CurrentUser) -> list[VehicleOut]:
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_vehicle(body: VehicleIn, db: DbSession, user: CurrentUser) -> VehicleOut:
     data = body.model_dump()
+    data["vin"] = data["vin"] or None  # treat "" as "no VIN"
     if data["vin"]:
-        data["vin"] = data["vin"].upper()
+        try:
+            data["vin"] = vin_service.normalize_vin(data["vin"])
+        except vin_service.InvalidVin as exc:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc))
     vehicle = Vehicle(user_id=user.id, **data)
     db.add(vehicle)
     try:

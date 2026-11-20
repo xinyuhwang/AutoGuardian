@@ -8,13 +8,26 @@ const VARIANTS: Record<Variant, string> = {
   ghost: "text-muted hover:text-text",
 };
 
+/**
+ * The one place that defines how buttons look. Also used for links that should look like
+ * buttons: <Link className={buttonClasses("primary")}>.
+ */
+export function buttonClasses(variant: Variant = "primary", fullWidth = false): string {
+  return [
+    "inline-flex h-11 items-center justify-center gap-2 rounded-control px-5 text-sm font-semibold",
+    "transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+    "disabled:cursor-not-allowed disabled:opacity-60",
+    VARIANTS[variant],
+    fullWidth ? "w-full" : "",
+  ].join(" ");
+}
+
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: Variant;
   loading?: boolean;
   fullWidth?: boolean;
 };
 
-/** The one place that defines how buttons look. */
 export function Button({
   variant = "primary",
   loading = false,
@@ -28,14 +41,7 @@ export function Button({
     <button
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      className={[
-        "inline-flex h-11 items-center justify-center gap-2 rounded-control px-5 text-sm font-semibold",
-        "transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
-        "disabled:cursor-not-allowed disabled:opacity-60",
-        VARIANTS[variant],
-        fullWidth ? "w-full" : "",
-        className,
-      ].join(" ")}
+      className={`${buttonClasses(variant, fullWidth)} ${className}`}
       {...props}
     >
       {loading && (

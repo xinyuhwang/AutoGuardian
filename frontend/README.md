@@ -30,11 +30,14 @@ Environment variables (put them in `.env.local`, which git ignores):
 ## Structure
 
 ```text
-src/app/(auth)/   login + signup pages and their shared layout
-src/app/page.tsx  signed-in home
+src/app/(auth)/   login + signup pages; layout sends signed-in users home
+src/app/(app)/    signed-in pages; layout has the header and sends logged-out users to /login
+  page.tsx            home (vehicle list)
+  vehicles/new/       add vehicle: VIN lookup → confirm details → save
 src/components/   Logo + ui/ building blocks
 src/lib/api.ts    fetch wrapper (sends the session cookie, readable errors)
 src/lib/auth.tsx  AuthProvider + useAuth() (current user, login, signup, logout)
+src/lib/vehicles.ts  Vehicle / VinDecode types
 ```
 
 Note: this uses Next.js 16. See `AGENTS.md` and `node_modules/next/dist/docs/` for version-specific APIs.
