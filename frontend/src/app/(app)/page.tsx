@@ -36,16 +36,18 @@ export default function HomePage() {
       ) : (
         <ul className="mt-3 divide-y divide-border">
           {vehicles.map((v) => (
-            <li key={v.id} className="py-3">
-              <p className="font-medium">
-                {v.nickname ?? vehicleTitle(v)}
-                {!v.nickname && v.trim ? <span className="text-muted"> {v.trim}</span> : null}
-              </p>
-              <p className="text-sm text-muted">
-                {[v.nickname && `${vehicleTitle(v)}${v.trim ? ` ${v.trim}` : ""}`, v.engine, v.transmission]
-                  .filter(Boolean)
-                  .join(" · ") || "Details not set"}
-              </p>
+            <li key={v.id}>
+              <Link href={`/vehicles/${v.id}`} className="-mx-2 block rounded-control px-2 py-3 hover:bg-surface-raised">
+                <p className="font-medium">
+                  {v.nickname ?? vehicleTitle(v)}
+                  {!v.nickname && v.trim ? <span className="text-muted"> {v.trim}</span> : null}
+                </p>
+                <p className="text-sm text-muted">
+                  {[v.nickname && `${vehicleTitle(v)}${v.trim ? ` ${v.trim}` : ""}`, v.engine, v.transmission]
+                    .filter(Boolean)
+                    .join(" · ") || "Details not set"}
+                </p>
+              </Link>
             </li>
           ))}
         </ul>

@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.auth.router import router as auth_router
 from app.config import CORS_ORIGINS
+from app.routers.documents import router as documents_router
 from app.routers.vehicles import router as vehicles_router
 
 app = FastAPI(title="AutoGuardian API", version="0.1.0")
@@ -19,6 +20,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(vehicles_router)
+app.include_router(documents_router)
 
 
 @app.get("/health")

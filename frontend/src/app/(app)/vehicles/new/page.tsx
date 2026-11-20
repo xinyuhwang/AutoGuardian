@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { api } from "@/lib/api";
-import type { VehicleInput, VinDecode } from "@/lib/vehicles";
+import type { Vehicle, VehicleInput, VinDecode } from "@/lib/vehicles";
 
 /**
  * Add a vehicle in two parts:
@@ -125,8 +125,8 @@ function DetailsStep({ decoded, onBack }: { decoded: VinDecode | null; onBack: (
     setError(undefined);
     setSaving(true);
     try {
-      await api("/vehicles", { method: "POST", body: JSON.stringify(body) });
-      router.push("/");
+      const saved = await api<Vehicle>("/vehicles", { method: "POST", body: JSON.stringify(body) });
+      router.push(`/vehicles/${saved.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't save the vehicle");
       setSaving(false);

@@ -83,7 +83,7 @@ class VehicleOut(VehicleIn):
     id: int
 
 
-def _get_owned_vehicle(db: DbSession, user: CurrentUser, vehicle_id: int) -> Vehicle:
+def get_owned_vehicle(db: DbSession, user: CurrentUser, vehicle_id: int) -> Vehicle:
     vehicle = db.scalars(
         select(Vehicle).where(Vehicle.id == vehicle_id, Vehicle.user_id == user.id)
     ).first()
@@ -122,4 +122,4 @@ def create_vehicle(body: VehicleIn, db: DbSession, user: CurrentUser) -> Vehicle
 
 @router.get("/{vehicle_id}")
 def get_vehicle(vehicle_id: int, db: DbSession, user: CurrentUser) -> VehicleOut:
-    return VehicleOut.model_validate(_get_owned_vehicle(db, user, vehicle_id))
+    return VehicleOut.model_validate(get_owned_vehicle(db, user, vehicle_id))

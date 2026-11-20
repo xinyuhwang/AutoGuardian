@@ -29,7 +29,8 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
       ...init,
       credentials: "include",
       headers: {
-        ...(init.body ? { "Content-Type": "application/json" } : {}),
+        // JSON bodies are strings; FormData (file uploads) sets its own multipart header.
+        ...(typeof init.body === "string" ? { "Content-Type": "application/json" } : {}),
         ...init.headers,
       },
     });

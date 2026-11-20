@@ -96,7 +96,8 @@ Every row is scoped by `user_id` / `vehicle_id` from day one.
 | --- | --- |
 | `users` | id, email |
 | `vehicles` | id, user_id, vin, year, make, model, trim, engine, transmission, purchase_date, purchase_mileage, home_zip (climate) |
-| `documents` | id, vehicle_id, file_path, mime, uploaded_at, kind (invoice / inspection / battery_test / estimate / obd_report / other), extraction_status, raw_extraction (JSON) |
+| `documents` | id, vehicle_id, kind (invoice / inspection / battery_test / estimate / obd_report / other; set by extraction), note, extraction_status, created_at; raw_extraction (JSON) arrives in step 1.6 |
+| `document_files` | id, document_id, position (page order), original_filename, storage_key, content_type, size_bytes, sha256, original_storage_key + original_content_type (kept when HEIC was converted to JPEG) |
 | `service_events` | id, vehicle_id, document_id?, date, mileage, shop, total_cost, minder_code?, summary |
 | `service_items` | id, service_event_id, component_id?, action (replaced / inspected / topped_off / recommended / declined), description, cost |
 | `components` | id, vehicle_id, type (battery_12v, brake_pads_front, tires, engine_oil, …), installed_date?, installed_mileage?, notes |
@@ -245,8 +246,8 @@ next step starts. Steps for a phase are written here when that phase begins.
 | 1.3 | Auth: email sign-up/login, every API scoped to the logged-in user | Two users can't see each other's data (tested) | Auth approach ✅ | ✅ Done (API; login screens come with the first UI in 1.5) |
 | 1.4a | Login & sign-up screens: Tailwind setup with design tokens, shared `Button`/`Input`/`Card` components, sign-up/login/logout, signed-in home | You can sign up, log in and out in the browser on phone and desktop widths | Styling ✅ | ✅ Done |
 | 1.4 | Add vehicle: VIN entry → NHTSA vPIC decode → user confirms make/model/trim/engine → saved | Your Accord's VIN produces a vehicle record you've confirmed | — | ✅ Done |
-| 1.5 | Document upload & storage: PDF/photo upload, stored on disk, listed per vehicle | Upload a dealer document and see it in a list; file kept in `uploads/` | — | Next |
-| 1.6 | AI extraction: Claude reads the document → structured JSON (date, mileage, Minder code, items, measurements, confidence) | Running it on a real dealer document gives correct fields | Claude model; sample documents | |
+| 1.5 | Document upload & storage: PDF/photo upload, stored on disk, listed per vehicle | Upload a dealer document and see it in a list; file kept in `uploads/` | — | ✅ Done |
+| 1.6 | AI extraction: Claude reads the document → structured JSON (date, mileage, Minder code, items, measurements, confidence) | Running it on a real dealer document gives correct fields | Claude model; sample documents | Next |
 | 1.7 | Review & commit: side-by-side document vs. extracted fields, edit, confirm → saved as `service_events`, `service_items`, `measurements`, `mileage_readings` | A confirmed document appears as structured records | — | |
 | 1.8 | Timeline: chronological list of service events with links to source documents | Your uploaded history shows newest-first on phone and desktop | — | |
 
