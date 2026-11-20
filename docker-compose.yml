@@ -1,0 +1,22 @@
+# Local development services. Credentials here are for local use only.
+services:
+  db:
+    image: postgres:17
+    container_name: autoguardian-db
+    environment:
+      POSTGRES_USER: autoguardian
+      POSTGRES_PASSWORD: autoguardian
+      POSTGRES_DB: autoguardian
+    ports:
+      - "5433:5432" # host 5433 → container 5432 (5432 is used by another project)
+    volumes:
+      - autoguardian-pgdata:/var/lib/postgresql/data
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U autoguardian -d autoguardian"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  autoguardian-pgdata:

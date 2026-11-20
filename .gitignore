@@ -1,1 +1,16 @@
+# macOS
 .DS_Store
+
+# Secrets / local env
+.env
+.env.*
+!.env.example
+
+# Python (backend)
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# User-uploaded vehicle documents (contain VIN, address)
+uploads/
